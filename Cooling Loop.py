@@ -45,32 +45,32 @@ WF_3 = ct.Hfc134a()
 WF_4 = ct.Hfc134a()
 
 "Knowns"
-T1_air = 38+273
-P1_air = 101325
-T2_air = 10+273
-P2_air = 101325
-air_1.TP = T1_air,P1_air
-air_2.TP = T2_air,P2_air
-h1_air = air_1.h
-h2_air = air_2.h
+T1_air = 38+273           # T1 ambient = 38C
+P1_air = 1*10**5          # P1 ambient = 1 bar
+T2_air = 10+273           # T2 into cabin = 10C
+P2_air = P1_air           # P2 = 1 bar
+air_1.TP = T1_air,P1_air  # Define state
+air_2.TP = T2_air,P2_air  # Define state
+h1_air = air_1.h          ###
+h2_air = air_2.h          ###
 
 "Set variables"
 voldot_air = 500          # Volumetric fow rate of air into cabin (m^3/hr)
-D_Gasline = 5/16          # Inner diameter of gas line (in)
-D_Liqline = 3             # Inner diameter of liquid line (in)
+D_Gasline = 2             # Inner diameter of gas line (in)
+D_Liqline = 2             # Inner diameter of liquid line (in)
 q_condenser = -2500       # Heat rejected from 
 n_pump = 0.95             # Pump efficiency
-P1 = 0.6*10**4 
-pr = 8
+P1 = 0.6*10**4            # Low side pressure
+pr = 5                    # Pressure ratio
 
 "Calculations from set variables"
-mdot_air = voldot_air*(air_1.density)*1/3600 
-q_cabin = mdot_air*(air_1.h-air_2.h)
-Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2  # Cross sectional area of 5/16" ID liquid line
+mdot_air = voldot_air*(air_1.density)*1/3600       # Mass flow rate of air into cabin
+q_cabin = mdot_air*(air_1.h-air_2.h)               # Heat into evaporator (-)
+Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2   # Cross sectional area of 5/16" ID liquid line
 Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" ID Gas line
 
 
-for mdot in range(1,8):
+for mdot in range(3,8):
     
     mdot_WF = (mdot/112)   # Define actual mdot of working fluid (kg/s)
     
@@ -209,4 +209,4 @@ pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Velocity of WF (m/s)')
 pyplot.title('WF Velocities vs. Mdot WF')
 pyplot.tight_layout()
-pyplot.savefig('IILawEff.jpg')
+
