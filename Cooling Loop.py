@@ -57,11 +57,11 @@ h2_air = air_2.h
 "Set variables"
 voldot_air = 500          # Volumetric fow rate of air into cabin (m^3/hr)
 D_Gasline = 5/16          # Inner diameter of gas line (in)
-D_Liqline = 2             # Inner diameter of liquid line (in)
+D_Liqline = 3             # Inner diameter of liquid line (in)
 q_condenser = -2500       # Heat rejected from 
 n_pump = 0.95             # Pump efficiency
 P1 = 0.6*10**4 
-pr = 7
+pr = 8
 
 "Calculations from set variables"
 mdot_air = voldot_air*(air_1.density)*1/3600 
@@ -109,12 +109,20 @@ for mdot in range(1,8):
     T4 = WF_4.T            ### Get rest of paramaters
     s4 = WF_4.s            ###
     
+#    #Effectiveness of Radiatior
+#    air_2_perf = ct.Solution('air.cti')     # I THINK THIS IS WRONG
+#    T2_air_perf = T3
+#    air_2_perf.TP = T2_air_perf,P2_air
+#    h2_air_perf = air_2_perf.h
+#    e_Rad = (h2_air-h1_air)/(h2_air_perf-h1_air)
+    
     #Effectiveness of Radiatior
-    air_2_perf = ct.Solution('air.cti')     # I THINK THIS IS WRONG
-    T2_air_perf = T3
-    air_2_perf.TP = T2_air_perf,P2_air
-    h2_air_perf = air_2_perf.h
-    e_Rad = (h2_air-h1_air)/(h2_air_perf-h1_air)
+    WF_4_perf =  ct.Hfc134a()
+    T4_perf = T1_air
+    WF_4_perf.TP = T4_perf,P4
+    h4_perf = WF_4_perf.h
+    e_Rad = (h4-h3)/(h4_perf-h3)
+        
     
     _mdot.append(mdot_WF)    
     _Vel_Liq.append(mdot_WF/(Ac_Liqline*WF_2.density))  
@@ -201,3 +209,4 @@ pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Velocity of WF (m/s)')
 pyplot.title('WF Velocities vs. Mdot WF')
 pyplot.tight_layout()
+pyplot.savefig('IILawEff.jpg')
