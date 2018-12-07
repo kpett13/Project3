@@ -65,7 +65,7 @@ pr = 5                    # Pressure ratio
 
 "Calculations from set variables"
 mdot_air = voldot_air*(air_1.density)*1/3600       # Mass flow rate of air into cabin
-q_cabin = mdot_air*(air_1.h-air_2.h)               # Heat into evaporator (-)
+q_cabin = mdot_air*(air_1.h-air_2.h)               # Heat into evaporator 
 Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2   # Cross sectional area of 5/16" ID liquid line
 Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" ID Gas line
 
@@ -76,7 +76,7 @@ for mdot in range(3,8):
     
     "State 1 - Outlet Throttle / Inlet Condenser"
     X1 = 1                 # Fluid is assumed to be a saturated vapor
-    WF_1.PX = P1, 1        # Define state [P1 is chosen out of loop.] 
+    WF_1.PX = P1, X1        # Define state [P1 is chosen out of loop.] 
     T1 = WF_1.T            ###
     s1 = WF_1.s            ### Get rest of paramaters
     h1 = WF_1.h            ###
