@@ -78,7 +78,7 @@ pr = 20                   # Pressure ratio
 "Calculations from set variables"
 mdot_air = voldot_air*(air_1.density)*1/3600       # Mass flow rate of air into cabin
 q_cabin = mdot_air*(air_1.h-air_2.h)               # Heat out of condensor (-)
-Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2   # Cross sectional area of 5/16" ID liquid line
+Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2   # Cross sectional area of 1/2" ID liquid line
 Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" ID Gas line
 
 
