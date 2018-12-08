@@ -86,7 +86,7 @@ Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2   # Cross sectional area of 1/2
 Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" ID Gas line
 
 
-for mdot in range(1,3):
+for mdot in range(1,5):
  
     mdot_WF = (mdot/338)   # Define actual mdot of working fluid (kg/s)
     
