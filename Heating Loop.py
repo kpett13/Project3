@@ -73,7 +73,7 @@ D_Liqline = .5            # Inner diameter of liquid line (in)
 q_evaporator = 2500       # Heat rejected from 
 n_pump = 0.95             # Pump efficiency
 P1 = 0.6*10**4            # Low side pressure
-pr = 20                   # Pressure ratio
+pr = 20                  # Pressure ratio
 
 "Calculations from set variables"
 mdot_air = voldot_air*(air_1.density)*1/3600       # Mass flow rate of air into cabin
@@ -84,7 +84,7 @@ Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" 
 
 for mdot in range(1,10):
  
-    mdot_WF = (mdot/272)   # Define actual mdot of working fluid (kg/s)
+    mdot_WF = (mdot/338)   # Define actual mdot of working fluid (kg/s)
     
     "State 2 - Outlet Evaporator / Inlet Pump"
     P2 = P1                # Heat addition is assumed to be isobaric
