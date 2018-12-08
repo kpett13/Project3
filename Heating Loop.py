@@ -59,9 +59,9 @@ WF_3 = ct.Water()
 WF_4 = ct.Water()
 
 "Knowns"
-T1_air = 0+273            # T1 ambient = 0C
+T1_air = 0+273.15            # T1 ambient = 0C
 P1_air = 1*10**5          # P1 ambient = 1 bar
-T2_air = 40+273           # T2 into cabin = 40C
+T2_air = 40+273.15           # T2 into cabin = 40C
 P2_air = P1_air           # P2 = 1 bar
 air_1.TP = T1_air,P1_air  # Define state
 air_2.TP = T2_air,P2_air  # Define state
@@ -88,7 +88,7 @@ Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" 
 
 for mdot in range(1,5):
  
-    mdot_WF = (mdot/338)   # Define actual mdot of working fluid (kg/s)
+    mdot_WF = (mdot/350)   # Define actual mdot of working fluid (kg/s)
     
     "State 2 - Outlet Evaporator / Inlet Pump"
     P2 = P1                # Heat addition is assumed to be isobaric
@@ -126,10 +126,11 @@ for mdot in range(1,5):
 
     #Effectiveness of Radiatior
     WF_4_perf =  ct.Water()
-    T4_perf = T1_air+1        #effectiveness is rough bc water cannot be solid
+    T4_perf = T1_air+0.05        #effectiveness is rough bc water cannot be solid
     WF_4_perf.TP = T4_perf,P4
     h4_perf = WF_4_perf.h
     e_Rad = (h4-h3)/(h4_perf-h3)
+    
     rho4 = WF_4.density
     rho2 = WF_2.density
     rho3 = WF_3.density
