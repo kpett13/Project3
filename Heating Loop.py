@@ -20,9 +20,11 @@ def h_OutCompressor(n_compressor, h_OutIs, h_In):
     return h_OutAct
 
 "Define lists for plotting"
+_COP = []
 _Qin = []
 _Qout = []
 _mdot = []
+_Vel_Storage = []
 _Vel_Liq = []
 _Vel_Gas = []
 _e_Rad = []
@@ -71,9 +73,11 @@ voldot_air = 500          # Volumetric fow rate of air into cabin (m^3/hr)
 D_Gasline = 2             # Inner diameter of gas line (in)
 D_Liqline = .5            # Inner diameter of liquid line (in)
 q_evaporator = 2500       # Heat rejected from 
-n_pump = 0.95             # Pump efficiency
-P1 = 0.6*10**4            # Low side pressure
-pr = 20                  # Pressure ratio
+n_pump = 0.85             # Pump efficiency
+P1 = 0.6*10**5            # Low side pressure
+pr = 5                    # Pressure ratio
+Ac_Storage= 0.05-(500*math.pi*((0.01)**2)/4)      # Cross Sectional Area of Storage 
+W_fan = 48
 
 "Calculations from set variables"
 mdot_air = voldot_air*(air_1.density)*1/3600       # Mass flow rate of air into cabin
@@ -82,7 +86,7 @@ Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2   # Cross sectional area of 1/2
 Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" ID Gas line
 
 
-for mdot in range(1,10):
+for mdot in range(1,3):
  
     mdot_WF = (mdot/338)   # Define actual mdot of working fluid (kg/s)
     
@@ -98,7 +102,7 @@ for mdot in range(1,10):
     P3 = pr*P2             # Pressure is increased by chosen pressure ratio to P1
     s3_is = s2             # First, assume pump to be isentropic 
     WF_3.SP = s3_is,P3     # Define isentropic outlet state
-    h3_is = h2             # Define isentropic outlet enthalpy
+    h3_is = WF_3.h             # Define isentropic outlet enthalpy
     h3 = h_OutCompressor(n_pump, h3_is, h2)    # Define actual outlet enthalpy using pump efficiency
     WF_3.HP = h3,P3                            # Define state
     X3 = WF_3.X            ###
@@ -128,8 +132,10 @@ for mdot in range(1,10):
     e_Rad = (h4-h3)/(h4_perf-h3)
     rho4 = WF_4.density
     rho2 = WF_2.density
+    rho3 = WF_3.density
     
     _mdot.append(mdot_WF)    
+    _Vel_Storage.append(mdot_WF/(Ac_Storage*rho3))
     _Vel_Liq.append(mdot_WF/(Ac_Liqline*rho4))  
     _Vel_Gas.append(mdot_WF/(Ac_Gasline*rho2))
     _e_Rad.append(e_Rad)
@@ -151,6 +157,7 @@ for mdot in range(1,10):
     _h41.append(h1-h4)
     _Qin.append((h4-h3)*mdot_WF)
     _Qout.append((h2-h1)*mdot_WF)
+    _COP.append(-q_cabin/(((h3-h2)*mdot_WF)+W_fan))
     
 pyplot.figure('Q vs. Mass Flow of WF')
 pyplot.plot(_mdot, _Qin, label="Q into Cabin")
@@ -206,9 +213,16 @@ pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Effectiveness')
 pyplot.title('Radiator Effectiveness vs. Mass Flow of WF')
 
+pyplot.figure('COP vs. Mass Flow of WF')
+pyplot.plot(_mdot, _COP)
+pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
+pyplot.ylabel('COP')
+pyplot.title('COP vs. Mass Flow of WF')
+
 pyplot.figure('WF Velocities vs. Mdot WF')
 pyplot.plot(_mdot, _Vel_Liq, label="Liquid")
 pyplot.plot(_mdot, _Vel_Gas, label="Gas")
+pyplot.plot(_mdot, _Vel_Storage, label="Storage")
 pyplot.legend()
 pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Velocity of WF (m/s)')
