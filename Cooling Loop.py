@@ -60,8 +60,8 @@ D_Gasline = 2             # Inner diameter of gas line (in)
 D_Liqline = 2             # Inner diameter of liquid line (in)
 q_condenser = -2500       # Heat rejected from 
 n_pump = 0.95             # Pump efficiency
-P1 = 0.6*10**4            # Low side pressure
-pr = 5                    # Pressure ratio
+P1 = 0.6*10**5            # Low side pressure
+pr = 14                    # Pressure ratio
 
 "Calculations from set variables"
 mdot_air = voldot_air*(air_1.density)*1/3600       # Mass flow rate of air into cabin
@@ -72,7 +72,7 @@ Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of Gas
 
 for mdot in range(3,8):
     
-    mdot_WF = (mdot/112)   # Define actual mdot of working fluid (kg/s)
+    mdot_WF = (mdot/70)   # Define actual mdot of working fluid (kg/s)
     
     "State 1 - Outlet Throttle / Inlet Condenser"
     X1 = 1                 # Fluid is assumed to be a saturated vapor
