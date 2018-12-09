@@ -13,9 +13,12 @@ def h_OutCompressor(n_compressor, h_OutIs, h_In):
     return h_OutAct
 
 "Define lists for plotting"
+_W_compressor = []
+_COP = []
 _Qin = []
 _Qout = []
 _mdot = []
+_Vel_Storage = []
 _Vel_Liq = []
 _Vel_Gas = []
 _e_Rad = []
@@ -45,88 +48,85 @@ WF_3 = ct.Hfc134a()
 WF_4 = ct.Hfc134a()
 
 "Knowns"
-T1_air = 38+273           # T1 ambient = 38C
+T1_air = 38+273.15        # T1 ambient = 38C
 P1_air = 1*10**5          # P1 ambient = 1 bar
-T2_air = 10+273           # T2 into cabin = 10C
+T2_air = 10+273.15        # T2 into cabin = 10C
 P2_air = P1_air           # P2 = 1 bar
 air_1.TP = T1_air,P1_air  # Define state
 air_2.TP = T2_air,P2_air  # Define state
-h1_air = air_1.h          ###
-h2_air = air_2.h          ###
+h1_air = air_1.h          
+h2_air = air_2.h          
 
 "Set variables"
 voldot_air = 500          # Volumetric fow rate of air into cabin (m^3/hr)
-D_Gasline = 2             # Inner diameter of gas line (in)
-D_Liqline = 2             # Inner diameter of liquid line (in)
-q_condenser = -2500       # Heat rejected from 
-n_pump = 0.95             # Pump efficiency
+D_gasline = 1             # Inner diameter of gas line (in)
+D_liqline = .5             # Inner diameter of liquid line (in)
+q_condenser = 2500       # Heat rejected from 
+n_compressor = 0.85       # compressor efficiency
 P1 = 0.6*10**5            # Low side pressure
-pr = 14                    # Pressure ratio
+pr = 5                   # Pressure ratio wrt. P1
+Ac_Storage= 0.05-(500*math.pi*((0.01)**2)/4)      # Cross-sectional area of packed bed storage gaps 
+W_fan = 48                # Work into blower fan (W)
 
 "Calculations from set variables"
 mdot_air = voldot_air*(air_1.density)*1/3600       # Mass flow rate of air into cabin
 q_cabin = mdot_air*(air_1.h-air_2.h)               # Heat into evaporator 
-Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2   # Cross sectional area of liquid line
-Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of Gas line
+Ac_Liqline = (math.pi/4)*((0.0254)*D_liqline)**2   # Cross sectional area of liquid line
+Ac_Gasline = (math.pi/4)*((0.0254)*D_gasline)**2   # Cross sectional area of Gas line
 
+for mdot in range(1,10):
+    
+    mdot_WF = (mdot/69)   # Define actual mdot of working fluid (kg/s)
 
-for mdot in range(3,8):
+    "State 1 - Outlet Evaporator / Inlet Compressor"
+    X1 = 1                 # Working fluid is assumed to be saturated vapor 
+    WF_1.PX = P1,X1        # Define state 
+    h1 = WF_1.h                   
+    s1 = WF_1.s           
+    T1 = WF_1.T            
+    rho1 = WF_1.density
     
-    mdot_WF = (mdot/70)   # Define actual mdot of working fluid (kg/s)
-    
-    "State 1 - Outlet Throttle / Inlet Condenser"
-    X1 = 1                 # Fluid is assumed to be a saturated vapor
-    WF_1.PX = P1, X1        # Define state [P1 is chosen out of loop.] 
-    T1 = WF_1.T            ###
-    s1 = WF_1.s            ### Get rest of paramaters
-    h1 = WF_1.h            ###
-    
-    "State 2 - Outlet Condenser / Inlet Pump"
-    P2 = P1                # Heat rejection is assumed to be isobaric
-    h2 = (q_condenser/mdot_WF)+h1   # Heat out to the source is q = mdot*(delta:h)          
+    "State 2 - Outlet Compressor / Inlet Condensor"
+    P2 = P1*pr                # Pressure is set to high side
+    s2_is = s1             # First, assume compressor to be isentropic 
+    WF_2.SP = s2_is,P2     # Define isentropic outlet state
+    h2_is = WF_2.h         # Define isentropic outlet enthalpy
+    h2 = h_OutCompressor(n_compressor, h2_is, h1)    # Define actual outlet enthalpy using compressor efficiency
     WF_2.HP = h2,P2        # Define state
-    h2 = WF_2.h            ###
-    X2 = WF_2.X            ### Get rest of paramaters    
-    T2 = WF_2.T            ### 
-    s2 = WF_2.s            ###
-
-    "State 3 - Outlet Pump / Inlet Radiator"
-    P3 = pr*P2             # Pressure is increased by chosen pressure ratio to P1
-    s3_is = s2             # First, assume pump to be isentropic 
-    WF_3.SP = s3_is,P3     # Define isentropic outlet state
-    h3_is = WF_2.h         # Define isentropic outlet enthalpy
-    h3 = h_OutCompressor(n_pump, h3_is, h2)    # Define actual outlet enthalpy using pump efficiency
-    WF_3.HP = h3,P3                            # Define state
-    X3 = WF_3.X            ###
-    T3 = WF_3.T            ### Get rest of paramaters
-    s3 = WF_3.s            ###
+    X2 = WF_2.X           
+    T2 = WF_2.T           
+    s2 = WF_2.s           
+    rho2 = WF_2.density
     
-    "State 4 - Outlet Radiatior / Inlet Throttle"
-    P4 = P3                     # Heat addition is isobaric
-    h4 = (q_cabin/mdot_WF)+h3   # Change in enthalpy due to heat from ambient
+    "State 3 - Outlet Condensor / Inlet Throttle"
+    P3 = P2                         # Heat addition is isobaric
+    h3 = h2-(q_condenser/mdot_WF)   # Change in enthalpy due to heat from ambient
+    WF_3.HP = h3,P3                 # Define state
+    X3 = WF_3.X           
+    T3 = WF_3.T           
+    s3 = WF_3.s       
+    rho3 = WF_3.density
+    
+    "State 4 - Outlet Throttle / Inlet Evaporator"
+    P4 = P1                     # Heat addition is isobaric
+    h4 = h1-(q_cabin/mdot_WF)  # Change in enthalpy due to heat from ambient
     WF_4.HP = h4,P4             # Define state
-    X4 = WF_4.X            ###
-    T4 = WF_4.T            ### Get rest of paramaters
-    s4 = WF_4.s            ###
+    X4 = WF_4.X          
+    T4 = WF_4.T            
+    s4 = WF_4.s 
+    rho4 = WF_4.density    
     
-#    #Effectiveness of Radiatior
-#    air_2_perf = ct.Solution('air.cti')     # I THINK THIS IS WRONG
-#    T2_air_perf = T3
-#    air_2_perf.TP = T2_air_perf,P2_air
-#    h2_air_perf = air_2_perf.h
-#    e_Rad = (h2_air-h1_air)/(h2_air_perf-h1_air)
+    "Effectiveness of Cabin Radiatior"
+    WF_1_perf =  ct.Hfc134a()
+    T1_perf = T1_air
+    WF_1_perf.TP = T1_perf,P1
+    h1_perf = WF_1_perf.h
+    e_Rad = (h1-h4)/(h1_perf-h4)
     
-    #Effectiveness of Radiatior
-    WF_4_perf =  ct.Hfc134a()
-    T4_perf = T1_air
-    WF_4_perf.TP = T4_perf,P4
-    h4_perf = WF_4_perf.h
-    e_Rad = (h4-h3)/(h4_perf-h3)
-        
+    W_compressor = (h2-h1)*mdot_WF    
     
+    _W_compressor.append(W_compressor)
     _mdot.append(mdot_WF)    
-    _Vel_Liq.append(mdot_WF/(Ac_Liqline*WF_2.density))  
-    _Vel_Gas.append(mdot_WF/(Ac_Gasline*WF_1.density))
     _e_Rad.append(e_Rad)
     _T1.append(T1)
     _T2.append(T2)
@@ -144,16 +144,18 @@ for mdot in range(3,8):
     _h23.append(h3-h2)
     _h34.append(h4-h3)
     _h41.append(h1-h4)
-    _Qin.append((h4-h3)*mdot_WF)
-    _Qout.append((h2-h1)*mdot_WF)
     
-pyplot.figure('Q vs. Mass Flow of WF')
-pyplot.plot(_mdot, _Qin, label="Qin Radiator")
-pyplot.plot(_mdot, _Qout, label="Qout Condenser")
-pyplot.legend()
+    _Vel_Storage.append(mdot_WF/(Ac_Storage*(rho4+rho1)/2))
+    _Vel_Liq.append(mdot_WF/(Ac_Liqline*rho3))  
+    _Vel_Gas.append(mdot_WF/(Ac_Gasline*rho1))
+    
+    _COP.append(q_cabin/(W_compressor+W_fan))
+    
+pyplot.figure('Work into Compressor vs. Mass Flow of WF')
+pyplot.plot(_mdot, _W_compressor)
 pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
-pyplot.ylabel('Heat (W)')
-pyplot.title('Q vs. Mass Flow of WF')    
+pyplot.ylabel('Work (W)')
+pyplot.title('Work vs. Mass Flow of WF')   
 
 pyplot.figure('Temperature vs. Mass Flow of WF')
 pyplot.plot(_mdot, _T1, label="State 1")
@@ -176,20 +178,20 @@ pyplot.ylabel('Quality')
 pyplot.title('Quality vs. Mass Flow of WF')
 
 pyplot.figure('Enthalpy Change vs. Mass Flow of WF')
-pyplot.plot(_mdot, _h12, label="Storage")
-pyplot.plot(_mdot, _h23, label="Pump")
-pyplot.plot(_mdot, _h34, label="Radiator")
-pyplot.plot(_mdot, _h41, label="Throttle")
+pyplot.plot(_mdot, _h12, label="Compressor")
+pyplot.plot(_mdot, _h23, label="Condensor (Storage)")
+pyplot.plot(_mdot, _h34, label="Throttle")
+pyplot.plot(_mdot, _h41, label="Evaporator (To cabin)")
 pyplot.legend()
 pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Enthalpy Change (J/kg)')
 pyplot.title('Enthalpy Change vs. Mass Flow of WF')
 
 pyplot.figure('Entropy Change vs. Mass Flow of WF')
-pyplot.plot(_mdot, _s12, label="Storage")
-pyplot.plot(_mdot, _s23, label="Pump")
-pyplot.plot(_mdot, _s34, label="Radiator")
-pyplot.plot(_mdot, _s41, label="Throttle")
+pyplot.plot(_mdot, _s12, label="Compressor")
+pyplot.plot(_mdot, _s23, label="Condensor (Storage)")
+pyplot.plot(_mdot, _s34, label="Throttle")
+pyplot.plot(_mdot, _s41, label="Evaporator (To cabin)")
 pyplot.legend()
 pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Entropy Change (J/kg-K)')
@@ -199,11 +201,18 @@ pyplot.figure('Radiator Effectiveness vs. Mass Flow of WF')
 pyplot.plot(_mdot, _e_Rad)
 pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Effectiveness')
-pyplot.title('Effectiveness vs. Mass Flow of WF')
+pyplot.title('Radiator Effectiveness vs. Mass Flow of WF')
+
+pyplot.figure('COP vs. Mass Flow of WF')
+pyplot.plot(_mdot, _COP)
+pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
+pyplot.ylabel('COP')
+pyplot.title('COP vs. Mass Flow of WF')
 
 pyplot.figure('WF Velocities vs. Mdot WF')
 pyplot.plot(_mdot, _Vel_Liq, label="Liquid")
 pyplot.plot(_mdot, _Vel_Gas, label="Gas")
+pyplot.plot(_mdot, _Vel_Storage, label="Storage")
 pyplot.legend()
 pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Velocity of WF (m/s)')
