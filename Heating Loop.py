@@ -12,6 +12,12 @@ def h_OutCompressor(n_compressor, h_OutIs, h_In):
     h_OutAct = ((h_OutIs - h_In)/n_compressor)+h_In
     return h_OutAct
 
+def frange(start, stop, step):
+    i = start
+    while i < stop:
+        yield i
+        i += step
+
 "Define lists for plotting"
 _W_compressor = []
 _COP = []
@@ -74,7 +80,7 @@ q_cabin = mdot_air*(air_2.h-air_1.h)               # Heat out of condensor
 Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2   # Cross sectional area of 1/2" ID liquid line
 Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" ID Gas line
 
-for mdot in range(1,5):
+for mdot in frange(1.0, 5.0, 0.1):
  
     mdot_WF = (mdot/380)   # Define actual mdot of working fluid (kg/s)
     
@@ -218,4 +224,3 @@ pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Velocity of WF (m/s)')
 pyplot.title('WF Velocities vs. Mdot WF')
 pyplot.tight_layout()
-
