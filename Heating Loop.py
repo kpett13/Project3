@@ -59,10 +59,10 @@ h2_air = air_2.h
        
 "Set variables"
 voldot_air = 500          # Volumetric fow rate of air into cabin (m^3/hr)
-D_Gasline = 1             # Inner diameter of gas line (in)
-D_Liqline = .5            # Inner diameter of liquid line (in)
+D_Gasline = .75             # Inner diameter of gas line (in)
+D_Liqline = .75            # Inner diameter of liquid line (in)
 q_evaporator = 2500       # Heat rejected from 
-n_compressor = 0.85       # Compressor efficiency
+n_compressor = 0.7       # Compressor efficiency
 P1 = 0.6*10**5            # Low side pressure
 pr = 5                    # Pressure ratio
 Ac_Storage= 0.05-(500*math.pi*((0.01)**2)/4)      # Cross Sectional Area of Storage 
