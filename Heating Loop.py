@@ -59,7 +59,7 @@ h2_air = air_2.h
        
 "Set variables"
 voldot_air = 500          # Volumetric fow rate of air into cabin (m^3/hr)
-D_Gasline = 2             # Inner diameter of gas line (in)
+D_Gasline = 1             # Inner diameter of gas line (in)
 D_Liqline = .5            # Inner diameter of liquid line (in)
 q_evaporator = 2500       # Heat rejected from 
 n_compressor = 0.85       # Compressor efficiency
@@ -74,9 +74,9 @@ q_cabin = mdot_air*(air_2.h-air_1.h)               # Heat out of condensor
 Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2   # Cross sectional area of 1/2" ID liquid line
 Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" ID Gas line
 
-for mdot in range(1,4):
+for mdot in range(1,5):
  
-    mdot_WF = (mdot/390)   # Define actual mdot of working fluid (kg/s)
+    mdot_WF = (mdot/380)   # Define actual mdot of working fluid (kg/s)
     
     "State 1 - Outlet Evaporator / Inlet Compressor"
     X1 = 1                 # Assume saturated vapor
@@ -145,7 +145,7 @@ for mdot in range(1,4):
     _h34.append(h4-h3)
     _h41.append(h1-h4)
     
-    _Vel_Storage.append(mdot_WF/(Ac_Storage*rho4))
+    _Vel_Storage.append(mdot_WF/(Ac_Storage*(rho4+rho1)/2))
     _Vel_Liq.append(mdot_WF/(Ac_Liqline*rho3))  
     _Vel_Gas.append(mdot_WF/(Ac_Gasline*rho1))
     
