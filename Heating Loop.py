@@ -70,7 +70,7 @@ W_fan = 48
 
 "Calculations from set variables"
 mdot_air = voldot_air*(air_1.density)*1/3600       # Mass flow rate of air into cabin
-q_cabin = mdot_air*(air_1.h-air_2.h)               # Heat out of condensor (-)
+q_cabin = mdot_air*(air_2.h-air_1.h)               # Heat out of condensor
 Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2   # Cross sectional area of 1/2" ID liquid line
 Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" ID Gas line
 
@@ -100,7 +100,7 @@ for mdot in range(1,4):
     
     "State 3 - Outlet Condensor / Inlet Throttle"
     P3 = P2                     # Heat addition is isobaric
-    h3 = (q_cabin/mdot_WF)+h2   # Enthalpy drop due to heat rejection to cabin
+    h3 = h2-(q_cabin/mdot_WF)   # Enthalpy drop due to heat rejection to cabin
     WF_3.HP = h3,P3             # Define state
     X3 = WF_3.X
     T3 = WF_3.T         
@@ -149,7 +149,7 @@ for mdot in range(1,4):
     _Vel_Liq.append(mdot_WF/(Ac_Liqline*rho3))  
     _Vel_Gas.append(mdot_WF/(Ac_Gasline*rho1))
     
-    _COP.append(-q_cabin/(W_compressor+W_fan))
+    _COP.append(q_cabin/(W_compressor+W_fan))
     
 pyplot.figure('Work into Compressor vs. Mass Flow of WF')
 pyplot.plot(_mdot, _W_compressor)
