@@ -5,6 +5,7 @@ Created on Wed Dec  5 20:23:48 2018
 @author: kpett
 """
 import cantera as ct 
+import numpy
 from matplotlib import pyplot
 import math
 
@@ -224,3 +225,19 @@ pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Velocity of WF (m/s)')
 pyplot.title('WF Velocities vs. Mdot WF')
 pyplot.tight_layout()
+
+_e_Rad = numpy.asarray(_e_Rad)
+_X1 = numpy.asarray(_X1)
+_X2 = numpy.asarray(_X2)
+_X3 = numpy.asarray(_X3)
+_X4 = numpy.asarray(_X4)
+_COP = numpy.asarray(_COP)
+_m_dotIdeal = numpy.where(_e_Rad >= 0.78)
+_e_RadIdeal = _e_Rad[_m_dotIdeal]
+_m_dotIdeal = numpy.where(_e_RadIdeal <= 0.8)
+_e_RadIdeal = _e_RadIdeal[_m_dotIdeal]
+_X1Ideal = _X1[_m_dotIdeal]
+_X2Ideal = _X2[_m_dotIdeal]
+_X3Ideal = _X3[_m_dotIdeal]
+_X4Ideal = _X4[_m_dotIdeal]
+_COPIdeal = _COP[_m_dotIdeal]
