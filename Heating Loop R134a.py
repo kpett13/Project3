@@ -5,12 +5,18 @@ Created on Wed Dec  5 20:23:48 2018
 @author: kpett
 """
 import cantera as ct 
+import numpy
 from matplotlib import pyplot
 import math
 
 def h_OutCompressor(n_compressor, h_OutIs, h_In):
     h_OutAct = ((h_OutIs - h_In)/n_compressor)+h_In
     return h_OutAct
+def frange(start, stop, step):
+    i = start
+    while i < stop:
+        yield i
+        i += step
 
 "Define lists for plotting"
 _W_compressor = []
@@ -74,7 +80,7 @@ q_cabin = mdot_air*(air_2.h-air_1.h)               # Heat out of condensor
 Ac_Liqline = (math.pi/4)*((0.0254)*D_Liqline)**2   # Cross sectional area of 1/2" ID liquid line
 Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" ID Gas line
 
-for mdot in range(1,5):
+for mdot in frange(1.0,5.0, 0.1):
  
     mdot_WF = (mdot/30)   # Define actual mdot of working fluid (kg/s)
     
@@ -219,3 +225,18 @@ pyplot.ylabel('Velocity of WF (m/s)')
 pyplot.title('WF Velocities vs. Mdot WF')
 pyplot.tight_layout()
 
+_e_Rad = numpy.asarray(_e_Rad)
+_X1 = numpy.asarray(_X1)
+_X2 = numpy.asarray(_X2)
+_X3 = numpy.asarray(_X3)
+_X4 = numpy.asarray(_X4)
+_COP = numpy.asarray(_COP)
+_m_dotIdeal = numpy.where(_e_Rad >= 0.78)
+_e_RadIdeal = _e_Rad[_m_dotIdeal]
+_m_dotIdeal = numpy.where(_e_RadIdeal <= 0.8)
+_e_RadIdeal = _e_RadIdeal[_m_dotIdeal]
+_X1Ideal = _X1[_m_dotIdeal]
+_X2Ideal = _X2[_m_dotIdeal]
+_X3Ideal = _X3[_m_dotIdeal]
+_X4Ideal = _X4[_m_dotIdeal]
+_COPIdeal = _COP[_m_dotIdeal]
