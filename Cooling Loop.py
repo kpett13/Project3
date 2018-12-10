@@ -219,3 +219,39 @@ pyplot.ylabel('Velocity of WF (m/s)')
 pyplot.title('WF Velocities vs. Mdot WF')
 pyplot.tight_layout()
 
+n_arrays = 4
+N_per_array = 65  
+t_fin = 0.05*0.0254
+space_fin = ((6.5*0.0254)-(N_per_array*t_fin))/(N_per_array-1)
+t_rad = 12*0.0254
+h_fin = (6/4)*0.0254
+A_base = space_fin*0.0254*t_rad
+Ac_air = space_fin*(N_per_array-1)*n_arrays*h_fin
+v_air = voldot_air*(1/3600)*(1/Ac_air)
+A_fin = 2*t_rad*h_fin
+A_tot = 2*n_arrays*(N_per_array-1)*A_base+(N_per_array-1)*2*t_rad*h_fin
+
+avg_dynvis = (air_1.viscosity+air_2.viscosity)/2
+avg_rho = (air_1.density+air_2.density)/2
+avg_cp = (air_1.cp+air_2.cp)/2
+avg_k = (air_1.thermal_conductivity+air_2.thermal_conductivity)/2
+avg_Pr = (avg_cp*avg_dynvis)/avg_k
+Re = avg_rho*v_air*t_rad/(avg_dynvis)
+
+if (Re < 5*10**5):
+    Nu = 0.664*Re**.5*avg_Pr**(1/3) 
+else:
+    Nu = ((0.037*Re**(4/5))-871)*avg_Pr**(1/3)
+h = avg_k*Nu/t_rad
+k_al = 205
+k_copper = 385
+perimeter_fin = 2*t_rad+2*h_fin
+Ac_fin = t_rad*t_fin
+
+m = math.sqrt((h*perimeter_fin)/(k_al*Ac_fin))
+eta_fin = math.tanh(m*t_rad)/(m*t_rad)
+
+UA_needed = q_cabin/(T1_air-176) 
+UA_actual = h*A_tot-h*A_fin*(1-eta_fin)
+
+space_fin_in = space_fin/0.0254
