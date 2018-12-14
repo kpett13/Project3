@@ -45,6 +45,10 @@ _s12 = []
 _s23 = []
 _s34 = []
 _s41 = []
+_rho1 =  []
+_rho2 = []
+_rho3 = []
+_rho4 = []
 
 "Define Fluids"
 air_1 = ct.Solution('air.cti')
@@ -151,6 +155,10 @@ for mdot in frange(1.0, 5.0, 0.1):
     _h23.append(h3-h2)
     _h34.append(h4-h3)
     _h41.append(h1-h4)
+    _rho1.append(rho1)
+    _rho2.append(rho2)
+    _rho3.append(rho3)
+    _rho4.append(rho4)
     
     _Vel_Storage.append(mdot_WF/(Ac_Storage*(rho4+rho1)/2))
     _Vel_Liq.append(mdot_WF/(Ac_Liqline*rho3))  
@@ -236,7 +244,6 @@ _m_dotIdeal = numpy.where(_e_Rad >= 0.78)
 _e_RadIdeal = _e_Rad[_m_dotIdeal]
 _m_dotIdeal = numpy.where(_e_RadIdeal <= 0.8)
 _e_RadIdeal = _e_RadIdeal[_m_dotIdeal]
-_X1Ideal = _X1[_m_dotIdeal]
 _X2Ideal = _X2[_m_dotIdeal]
 _X3Ideal = _X3[_m_dotIdeal]
 _X4Ideal = _X4[_m_dotIdeal]
