@@ -7,10 +7,17 @@ Created on Wed Dec  5 20:23:48 2018
 import cantera as ct 
 from matplotlib import pyplot
 import math
+import numpy
 
 def h_OutCompressor(n_compressor, h_OutIs, h_In):
     h_OutAct = ((h_OutIs - h_In)/n_compressor)+h_In
     return h_OutAct
+
+def frange(start, stop, step):
+    i = start
+    while i < stop:
+        yield i
+        i += step
 
 "Define lists for plotting"
 _W_compressor = []
@@ -74,7 +81,7 @@ q_cabin = mdot_air*(air_1.h-air_2.h)               # Heat into evaporator
 Ac_Liqline = (math.pi/4)*((0.0254)*D_liqline)**2   # Cross sectional area of liquid line
 Ac_Gasline = (math.pi/4)*((0.0254)*D_gasline)**2   # Cross sectional area of Gas line
 
-for mdot in range(1,10):
+for mdot in frange(1,10, 0.1):
     
     mdot_WF = (mdot/69)   # Define actual mdot of working fluid (kg/s)
 
@@ -255,3 +262,27 @@ UA_needed = q_cabin/(T1_air-176)
 UA_actual = h*A_tot-h*A_fin*(1-eta_fin)
 
 space_fin_in = space_fin/0.0254
+
+_e_Rad = numpy.asarray(_e_Rad)
+_X1 = numpy.asarray(_X1)
+_X2 = numpy.asarray(_X2)
+_X3 = numpy.asarray(_X3)
+_X4 = numpy.asarray(_X4)
+_COP = numpy.asarray(_COP)
+_m_dotIdeal = numpy.where(_e_Rad > .83)
+_X2Ideal = _X2[_m_dotIdeal]
+_X3Ideal = _X3[_m_dotIdeal]
+_X4Ideal = _X4[_m_dotIdeal]
+_COPIdeal = _COP[_m_dotIdeal]
+
+
+_Tinf = T3
+_V_al = (4/3) * numpy.pi * (0.01 /2)**3 
+_rho_al = 2710
+_m_al = _rho_al * _V_al 
+_cp_al = 921
+
+T0_balls = (-9000) / (35000 * _m_al * _cp_al) + _Tinf
+print(T0_balls - 273.15)
+
+

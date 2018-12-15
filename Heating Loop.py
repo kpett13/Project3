@@ -8,6 +8,38 @@ import cantera as ct
 import numpy
 from matplotlib import pyplot
 import math
+from numba import jit
+
+@jit(nopython = True)
+def time_v_balls():
+    _rho_al = 2710
+    _T_inf = 359
+    _V_al = (4/3) * numpy.pi * (0.01 /2)**3 
+    _m_al = _rho_al * _V_al    
+    _cp_al = 921
+    _h_h20 = 548
+    _As_h20_al = 4 * numpy.pi * (0.01/2)**2
+    _N0 = 75
+    _t0 = 0.01
+    _T0_al = 595
+    _Tavg =_T0_al
+    t = []
+    n = []
+    T_avg = []
+    T_add = []
+    t.append(_t0)
+    n.append(_N0)
+    T_avg.append(_Tavg)
+    
+    for i in range(75, 35001):
+        T_add.append(_T_inf + (t[-1] * 2500 - _m_al * _cp_al * (_T0_al - _T_inf) / 
+                          (n[-1] * _m_al * _cp_al)))
+        t.append((_rho_al * _V_al * _cp_al)/(_h_h20 * _As_h20_al) * 
+                 numpy.log((T_avg[-1] - _T_inf) / (T_add[-1] - _T_inf)))
+        n.append(n[-1] + 1)
+        T_avg.append((n[-2] * T_add[-1] + _T0_al) / n[-1])
+    return t, n, T_avg, T_add
+    
 
 def h_OutCompressor(n_compressor, h_OutIs, h_In):
     h_OutAct = ((h_OutIs - h_In)/n_compressor)+h_In
@@ -283,3 +315,10 @@ eta_fin = math.tanh(m*t_rad)/(m*t_rad)
 
 UA_needed = q_cabin/(595-T1_air) 
 UA_actual = h*A_tot-h*A_fin*(1-eta_fin)
+
+
+t, n, T_avg, T_add = time_v_balls()
+pyplot.figure()
+pyplot.plot(n, t)
+pyplot.figure()
+pyplot.plot(t, T_add)
