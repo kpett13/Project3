@@ -12,13 +12,18 @@ def h_OutCompressor(n_compressor, h_OutIs, h_In):
     h_OutAct = ((h_OutIs - h_In)/n_compressor)+h_In
     return h_OutAct
 
+def frange(start, stop, step):
+    i = start
+    while i < stop:
+        yield i
+        i += step
+
 "Define lists for plotting"
 _W_compressor = []
 _COP = []
 _Qin = []
 _Qout = []
 _mdot = []
-_Vel_Storage = []
 _Vel_Liq = []
 _Vel_Gas = []
 _e_Rad = []
@@ -58,16 +63,14 @@ h1_air = air_1.h
 h2_air = air_2.h          
 
 "Set variables"
-voldot_air = 500          # Volumetric fow rate of air into cabin (m^3/hr)
+voldot_air = 595          # Volumetric fow rate of air into cabin (m^3/hr)
 D_gasline = .75           # Inner diameter of gas line (in)
-D_liqline = .75             # Inner diameter of liquid line (in)
-q_condenser = 2500       # Heat rejected from 
+D_liqline = .75           # Inner diameter of liquid line (in)
+q_condenser = 2500        # Heat rejected from 
 n_compressor = 0.85       # compressor efficiency
 P1 = 0.6*10**5            # Low side pressure
-pr = 5                   # Pressure ratio wrt. P1
-Ac_Storage= 0.05-(500*math.pi*((0.01)**2)/4)      # Cross-sectional area of packed bed storage gaps 
-W_fan_max = 48                # Work into blower fan (W)
-W_fan = W_fan_max*voldot_air/595
+pr = 5                    # Pressure ratio wrt. P1
+W_fan = 48                # Work into blower fan (W)
 
 "Calculations from set variables"
 mdot_air = voldot_air*(air_1.density)*1/3600       # Mass flow rate of air into cabin
@@ -75,9 +78,9 @@ q_cabin = mdot_air*(air_1.h-air_2.h)               # Heat into evaporator
 Ac_Liqline = (math.pi/4)*((0.0254)*D_liqline)**2   # Cross sectional area of liquid line
 Ac_Gasline = (math.pi/4)*((0.0254)*D_gasline)**2   # Cross sectional area of Gas line
 
-for mdot in range(1,10):
+for mdot in frange(1.0, 5.0, 0.1):
     
-    mdot_WF = (mdot/69)   # Define actual mdot of working fluid (kg/s)
+    mdot_WF = (mdot/58)   # Define actual mdot of working fluid (kg/s)
 
     "State 1 - Outlet Evaporator / Inlet Compressor"
     X1 = 1                 # Working fluid is assumed to be saturated vapor 
@@ -145,8 +148,7 @@ for mdot in range(1,10):
     _h23.append(h3-h2)
     _h34.append(h4-h3)
     _h41.append(h1-h4)
-    
-    _Vel_Storage.append(mdot_WF/(Ac_Storage*(rho4+rho1)/2))
+
     _Vel_Liq.append(mdot_WF/(Ac_Liqline*rho3))  
     _Vel_Gas.append(mdot_WF/(Ac_Gasline*rho1))
     
@@ -213,7 +215,6 @@ pyplot.title('COP vs. Mass Flow of WF')
 pyplot.figure('WF Velocities vs. Mdot WF')
 pyplot.plot(_mdot, _Vel_Liq, label="Liquid")
 pyplot.plot(_mdot, _Vel_Gas, label="Gas")
-pyplot.plot(_mdot, _Vel_Storage, label="Storage")
 pyplot.legend()
 pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Velocity of WF (m/s)')
