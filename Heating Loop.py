@@ -25,7 +25,6 @@ _COP = []
 _Qin = []
 _Qout = []
 _mdot = []
-_Vel_Storage = []
 _Vel_Liq = []
 _Vel_Gas = []
 _e_Rad = []
@@ -65,16 +64,14 @@ h1_air = air_1.h
 h2_air = air_2.h   
        
 "Set variables"
-voldot_air = 500          # Volumetric fow rate of air into cabin (m^3/hr)
+voldot_air = 595          # Volumetric fow rate of air into cabin (m^3/hr)
 D_Gasline = .75             # Inner diameter of gas line (in)
 D_Liqline = .75            # Inner diameter of liquid line (in)
 q_evaporator = 2500       # Heat rejected from 
 n_compressor = 0.7       # Compressor efficiency
 P1 = 0.6*10**5            # Low side pressure
 pr = 5                    # Pressure ratio
-Ac_Storage= 0.05-(500*math.pi*((0.01)**2)/4)      # Cross Sectional Area of Storage 
-W_fan_max = 48                # Work into blower fan (W)
-W_fan = W_fan_max*voldot_air/595
+W_fan = 48                # Work into blower fan (W)
 
 "Calculations from set variables"
 mdot_air = voldot_air*(air_1.density)*1/3600       # Mass flow rate of air into cabin
@@ -84,7 +81,7 @@ Ac_Gasline = (math.pi/4)*((0.0254)*D_Gasline)**2   # Cross sectional area of 2" 
 
 for mdot in frange(1.0, 5.0, 0.1):
  
-    mdot_WF = (mdot/380)   # Define actual mdot of working fluid (kg/s)
+    mdot_WF = (mdot/310)   # Define actual mdot of working fluid (kg/s)
     
     "State 1 - Outlet Evaporator / Inlet Compressor"
     X1 = 1                 # Assume saturated vapor
@@ -152,8 +149,6 @@ for mdot in frange(1.0, 5.0, 0.1):
     _h23.append(h3-h2)
     _h34.append(h4-h3)
     _h41.append(h1-h4)
-    
-    _Vel_Storage.append(mdot_WF/(Ac_Storage*(rho4+rho1)/2))
     _Vel_Liq.append(mdot_WF/(Ac_Liqline*rho3))  
     _Vel_Gas.append(mdot_WF/(Ac_Gasline*rho1))
     
@@ -220,34 +215,17 @@ pyplot.title('COP vs. Mass Flow of WF')
 pyplot.figure('WF Velocities vs. Mdot WF')
 pyplot.plot(_mdot, _Vel_Liq, label="Liquid")
 pyplot.plot(_mdot, _Vel_Gas, label="Gas")
-pyplot.plot(_mdot, _Vel_Storage, label="Storage")
 pyplot.legend()
 pyplot.xlabel('Mass Flow of Working Fluid (kg/s)')
 pyplot.ylabel('Velocity of WF (m/s)')
 pyplot.title('WF Velocities vs. Mdot WF')
 pyplot.tight_layout()
 
-_e_Rad = numpy.asarray(_e_Rad)
-_X1 = numpy.asarray(_X1)
-_X2 = numpy.asarray(_X2)
-_X3 = numpy.asarray(_X3)
-_X4 = numpy.asarray(_X4)
-_COP = numpy.asarray(_COP)
-_m_dotIdeal = numpy.where(_e_Rad >= 0.78)
-_e_RadIdeal = _e_Rad[_m_dotIdeal]
-_m_dotIdeal = numpy.where(_e_RadIdeal <= 0.8)
-_e_RadIdeal = _e_RadIdeal[_m_dotIdeal]
-_X1Ideal = _X1[_m_dotIdeal]
-_X2Ideal = _X2[_m_dotIdeal]
-_X3Ideal = _X3[_m_dotIdeal]
-_X4Ideal = _X4[_m_dotIdeal]
-_COPIdeal = _COP[_m_dotIdeal]
-
 n_arrays = 4
 N_per_array = 65  
 t_fin = 0.05*0.0254
 space_fin = ((6.5*0.0254)-(N_per_array*t_fin))/(N_per_array-1)
-t_rad = 12*0.0254
+t_rad = 6.5*0.0254
 h_fin = (6/4)*0.0254
 A_base = space_fin*0.0254*t_rad
 Ac_air = space_fin*(N_per_array-1)*n_arrays*h_fin
@@ -275,5 +253,5 @@ Ac_fin = t_rad*t_fin
 m = math.sqrt((h*perimeter_fin)/(k_al*Ac_fin))
 eta_fin = math.tanh(m*t_rad)/(m*t_rad)
 
-UA_needed = q_cabin/(T2-T1_air) 
+UA_needed = q_cabin/(T2-(T1_air+T2_air)/2) 
 UA_actual = h*A_tot-h*A_fin*(1-eta_fin)
