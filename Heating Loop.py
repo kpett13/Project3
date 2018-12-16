@@ -8,38 +8,6 @@ import cantera as ct
 import numpy
 from matplotlib import pyplot
 import math
-from numba import jit
-
-@jit(nopython = True)
-def time_v_balls():
-    _rho_al = 2710
-    _T_inf = 359
-    _V_al = (4/3) * numpy.pi * (0.01 /2)**3 
-    _m_al = _rho_al * _V_al    
-    _cp_al = 921
-    _h_h20 = 548
-    _As_h20_al = 4 * numpy.pi * (0.01/2)**2
-    _N0 = 75
-    _t0 = 0.01
-    _T0_al = 595
-    _Tavg =_T0_al
-    t = []
-    n = []
-    T_avg = []
-    T_add = []
-    t.append(_t0)
-    n.append(_N0)
-    T_avg.append(_Tavg)
-    
-    for i in range(75, 35001):
-        T_add.append(_T_inf + (t[-1] * 2500 - _m_al * _cp_al * (_T0_al - _T_inf) / 
-                          (n[-1] * _m_al * _cp_al)))
-        t.append((_rho_al * _V_al * _cp_al)/(_h_h20 * _As_h20_al) * 
-                 numpy.log((T_avg[-1] - _T_inf) / (T_add[-1] - _T_inf)))
-        n.append(n[-1] + 1)
-        T_avg.append((n[-2] * T_add[-1] + _T0_al) / n[-1])
-    return t, n, T_avg, T_add
-    
 
 def h_OutCompressor(n_compressor, h_OutIs, h_In):
     h_OutAct = ((h_OutIs - h_In)/n_compressor)+h_In
@@ -77,10 +45,6 @@ _s12 = []
 _s23 = []
 _s34 = []
 _s41 = []
-_rho1 =  []
-_rho2 = []
-_rho3 = []
-_rho4 = []
 
 "Define Fluids"
 air_1 = ct.Solution('air.cti')
@@ -109,7 +73,8 @@ n_compressor = 0.7       # Compressor efficiency
 P1 = 0.6*10**5            # Low side pressure
 pr = 5                    # Pressure ratio
 Ac_Storage= 0.05-(500*math.pi*((0.01)**2)/4)      # Cross Sectional Area of Storage 
-W_fan = 48
+W_fan_max = 48                # Work into blower fan (W)
+W_fan = W_fan_max*voldot_air/595
 
 "Calculations from set variables"
 mdot_air = voldot_air*(air_1.density)*1/3600       # Mass flow rate of air into cabin
@@ -165,7 +130,7 @@ for mdot in frange(1.0, 5.0, 0.1):
     WF_3_perf.TP = T3_perf,P3    
     h3_perf = WF_3_perf.h
     e_Rad = (h3-h2)/(h3_perf-h2) # Calculate required effectiveness
-    
+                
     W_compressor = (h2-h1)*mdot_WF
     
     _W_compressor.append(W_compressor)
@@ -187,10 +152,6 @@ for mdot in frange(1.0, 5.0, 0.1):
     _h23.append(h3-h2)
     _h34.append(h4-h3)
     _h41.append(h1-h4)
-    _rho1.append(rho1)
-    _rho2.append(rho2)
-    _rho3.append(rho3)
-    _rho4.append(rho4)
     
     _Vel_Storage.append(mdot_WF/(Ac_Storage*(rho4+rho1)/2))
     _Vel_Liq.append(mdot_WF/(Ac_Liqline*rho3))  
@@ -276,6 +237,7 @@ _m_dotIdeal = numpy.where(_e_Rad >= 0.78)
 _e_RadIdeal = _e_Rad[_m_dotIdeal]
 _m_dotIdeal = numpy.where(_e_RadIdeal <= 0.8)
 _e_RadIdeal = _e_RadIdeal[_m_dotIdeal]
+_X1Ideal = _X1[_m_dotIdeal]
 _X2Ideal = _X2[_m_dotIdeal]
 _X3Ideal = _X3[_m_dotIdeal]
 _X4Ideal = _X4[_m_dotIdeal]
@@ -313,12 +275,5 @@ Ac_fin = t_rad*t_fin
 m = math.sqrt((h*perimeter_fin)/(k_al*Ac_fin))
 eta_fin = math.tanh(m*t_rad)/(m*t_rad)
 
-UA_needed = q_cabin/(595-T1_air) 
+UA_needed = q_cabin/(T2-T1_air) 
 UA_actual = h*A_tot-h*A_fin*(1-eta_fin)
-
-
-t, n, T_avg, T_add = time_v_balls()
-pyplot.figure()
-pyplot.plot(n, t)
-pyplot.figure()
-pyplot.plot(t, T_add)
